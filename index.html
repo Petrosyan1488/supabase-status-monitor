@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Монитор статусов Supabase</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+      background: #fafafa;
+    }
+
+    .status {
+      font-weight: bold;
+      color: #2563eb;
+    }
+
+    select, button {
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      cursor: pointer;
+      background: #16a34a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      margin-left: 10px;
+    }
+
+    button:hover {
+      background: #15803d;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Монитор статусов на Supabase</h1>
+
+    <div class="card">
+      <h2>Мой статус</h2>
+      <p><strong>Имя:</strong> <span id="myName">Загрузка...</span></p>
+      <p><strong>Статус:</strong> <span class="status" id="myStatus">Загрузка...</span></p>
+
+      <select id="statusSelect">
+  <option value="На учебе">На учебе</option>
+  <option value="Дома">Дома</option>
+  <option value="На улице">На улице</option>
+  <option value="Отдыхаю">Отдыхаю</option>
+</select>
+      <button onclick="updateStatus()">Обновить статус</button>
+    </div>
+
+    <div class="card">
+      <h2>Все пользователи</h2>
+      <div id="profilesList">Загрузка...</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const supabaseUrl = "https://aocsygtduocsqevgbpqg.supabase.co";
+    const supabaseKey = "sb_publishable_XRbpecmnfjdB-El_Y_rT5w_EK6Hb1c2";
+    const myId = "90240462-5022-4a4e-bb15-fee5a80108cb";
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    async function loadMyProfile() {
+      const { data, error } = await supabase
+        .from("profiles2")
+        .select("*")
+        .eq("id", myId)
+        .single();
+
+      if (error) {
+        document.getElementById("myName").textContent = "Ошибка";
+        document.getElementById("myStatus").textContent = error.message;
+        return;
+      }
+
+      document.getElementById("myName").textContent = data.username;
+      document.getElementById("myStatus").textContent = data.status;
+      document.getElementById("statusSelect").value = data.status;
+    }
+
+    async function loadAllProfiles() {
+      const { data, error } = await supabase
+        .from("profiles2")
+        .select("*")
+        .order("username", { ascending: true });
+
+      if (error) {
+        document.getElementById("profilesList").textContent = error.message;
+        return;
+      }
+
+      const list = document.getElementById("profilesList");
+      list.innerHTML = "";
+
+      data.forEach(profile => {
+        const div = document.createElement("div");
+        div.innerHTML = `<p><strong>${profile.username}</strong>: <span class="status">${profile.status}</span></p>`;
+        list.appendChild(div);
+      });
+    }
+
+    async function updateStatus() {
+      const newStatus = document.getElementById("statusSelect").value;
+
+      const { error } = await supabase
+        .from("profiles2")
+        .update({ status: newStatus })
+        .eq("id", myId);
+
+      if (error) {
+        alert("Ошибка обновления: " + error.message);
+        return;
+      }
+
+      await loadMyProfile();
+      await loadAllProfiles();
+    }
+
+    window.updateStatus = updateStatus;
+
+    supabase
+      .channel("profiles2-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "profiles2" },
+        () => {
+          loadMyProfile();
+          loadAllProfiles();
+        }
+      )
+      .subscribe();
+
+    loadMyProfile();
+    loadAllProfiles();
+  </script>
+</body>
+</html>
