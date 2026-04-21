@@ -175,28 +175,54 @@
     }
 
     async function loadMyProfile() {
-      if (!currentUser) {
-        document.getElementById("myName").textContent = "Вы не вошли";
-        document.getElementById("myStatus").textContent = "-";
-        return;
-      }
+  if (!currentUser) {
+    document.getElementById("myName").textContent = "Вы не вошли";
+    document.getElementById("myStatus").textContent = "-";
+    return;
+  }
 
-      const { data, error } = await supabase
-        .from("profiles2")
-        .select("*")
-        .eq("id", currentUser.id)
-        .single();
+  const { data, error } = await supabase
+    .from("profiles2")
+    .select("*")
+    .eq("id", currentUser.id)
+    .maybeSingle();
 
-      if (error) {
-        document.getElementById("myName").textContent = "Ошибка";
-        document.getElementById("myStatus").textContent = error.message;
-        return;
-      }
+  if (error) {
+    document.getElementById("myName").textContent = "Ошибка";
+    document.getElementById("myStatus").textContent = error.message;
+    return;
+  }
 
-      document.getElementById("myName").textContent = data.username;
-      document.getElementById("myStatus").textContent = data.status;
-      document.getElementById("statusSelect").value = data.status;
+  if (!data) {
+    const username =
+      currentUser.user_metadata?.full_name ||
+      currentUser.user_metadata?.name ||
+      currentUser.email ||
+      "Без имени";
+
+    const { error: insertError } = await supabase
+      .from("profiles2")
+      .insert([
+        {
+          id: currentUser.id,
+          username: username,
+          status: "На учебе"
+        }
+      ]);
+
+    if (insertError) {
+      document.getElementById("myName").textContent = "Ошибка";
+      document.getElementById("myStatus").textContent = insertError.message;
+      return;
     }
+
+    return loadMyProfile();
+  }
+
+  document.getElementById("myName").textContent = data.username;
+  document.getElementById("myStatus").textContent = data.status;
+  document.getElementById("statusSelect").value = data.status;
+}
 
     async function loadAllProfiles() {
       const { data, error } = await supabase
