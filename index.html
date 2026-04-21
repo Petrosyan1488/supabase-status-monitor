@@ -56,6 +56,21 @@
     button:hover {
       background: #15803d;
     }
+
+    .auth-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .secondary {
+      background: #6b7280;
+    }
+
+    .secondary:hover {
+      background: #4b5563;
+    }
   </style>
 </head>
 <body>
@@ -63,16 +78,24 @@
     <h1>Монитор статусов на Supabase</h1>
 
     <div class="card">
+      <h2>Авторизация</h2>
+      <div class="auth-buttons">
+        <button onclick="signInWithGoogle()">Войти через Google</button>
+        <button class="secondary" onclick="signOut()">Выйти</button>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>Мой статус</h2>
       <p><strong>Имя:</strong> <span id="myName">Загрузка...</span></p>
       <p><strong>Статус:</strong> <span class="status" id="myStatus">Загрузка...</span></p>
 
       <select id="statusSelect">
-  <option value="На учебе">На учебе</option>
-  <option value="Дома">Дома</option>
-  <option value="На улице">На улице</option>
-  <option value="Отдыхаю">Отдыхаю</option>
-</select>
+        <option value="На учебе">На учебе</option>
+        <option value="Дома">Дома</option>
+        <option value="На улице">На улице</option>
+        <option value="Отдыхаю">Отдыхаю</option>
+      </select>
       <button onclick="updateStatus()">Обновить статус</button>
     </div>
 
@@ -87,15 +110,81 @@
 
     const supabaseUrl = "https://aocsygtduocsqevgbpqg.supabase.co";
     const supabaseKey = "sb_publishable_XRbpecmnfjdB-El_Y_rT5w_EK6Hb1c2";
-    const myId = "90240462-5022-4a4e-bb15-fee5a80108cb";
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    let currentUser = null;
+
+    async function signInWithGoogle() {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: "https://petrosyan1488.github.io/supabase-status-monitor/"
+        }
+      });
+
+      if (error) {
+        alert("Ошибка входа: " + error.message);
+      }
+    }
+
+    async function signOut() {
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        alert("Ошибка выхода: " + error.message);
+        return;
+      }
+
+      location.reload();
+    }
+
+    async function ensureProfile(user) {
+      const username =
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        user.email ||
+        "Без имени";
+
+      const { data: existingProfile, error: selectError } = await supabase
+        .from("profiles2")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (selectError) {
+        console.error("Ошибка проверки профиля:", selectError.message);
+        return;
+      }
+
+      if (!existingProfile) {
+        const { error: insertError } = await supabase
+          .from("profiles2")
+          .insert([
+            {
+              id: user.id,
+              username: username,
+              status: "На учебе"
+            }
+          ]);
+
+        if (insertError) {
+          console.error("Ошибка создания профиля:", insertError.message);
+        }
+      }
+    }
+
     async function loadMyProfile() {
+      if (!currentUser) {
+        document.getElementById("myName").textContent = "Вы не вошли";
+        document.getElementById("myStatus").textContent = "-";
+        return;
+      }
+
       const { data, error } = await supabase
         .from("profiles2")
         .select("*")
-        .eq("id", myId)
+        .eq("id", currentUser.id)
         .single();
 
       if (error) {
@@ -131,12 +220,17 @@
     }
 
     async function updateStatus() {
+      if (!currentUser) {
+        alert("Сначала войдите через Google");
+        return;
+      }
+
       const newStatus = document.getElementById("statusSelect").value;
 
       const { error } = await supabase
         .from("profiles2")
         .update({ status: newStatus })
-        .eq("id", myId);
+        .eq("id", currentUser.id);
 
       if (error) {
         alert("Ошибка обновления: " + error.message);
@@ -147,7 +241,26 @@
       await loadAllProfiles();
     }
 
-    window.updateStatus = updateStatus;
+    async function initAuth() {
+      const { data, error } = await supabase.auth.getUser();
+
+      if (error) {
+        console.error("Ошибка получения пользователя:", error.message);
+      }
+
+      currentUser = data?.user ?? null;
+
+      if (currentUser) {
+        await ensureProfile(currentUser);
+      }
+
+      await loadMyProfile();
+      await loadAllProfiles();
+    }
+
+    supabase.auth.onAuthStateChange(async () => {
+      await initAuth();
+    });
 
     supabase
       .channel("profiles2-realtime")
@@ -161,8 +274,11 @@
       )
       .subscribe();
 
-    loadMyProfile();
-    loadAllProfiles();
+    window.signInWithGoogle = signInWithGoogle;
+    window.signOut = signOut;
+    window.updateStatus = updateStatus;
+
+    initAuth();
   </script>
 </body>
 </html>
