@@ -3,185 +3,433 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Монитор статусов Supabase</title>
+  <title>Study Pulse | Supabase</title>
 
   <style>
+    :root {
+      --bg: #0f172a;
+      --panel: rgba(15, 23, 42, 0.82);
+      --panel-light: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.14);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --blue: #38bdf8;
+      --green: #22c55e;
+      --red: #f43f5e;
+      --yellow: #f59e0b;
+      --purple: #a855f7;
+      --gray: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
       margin: 0;
-      padding: 25px;
+      min-height: 100vh;
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.28), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.25), transparent 35%),
+        linear-gradient(135deg, #020617, #0f172a 55%, #111827);
+      padding: 28px;
     }
 
-    .container {
-      max-width: 760px;
+    .layout {
+      max-width: 1180px;
       margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      align-items: start;
     }
 
-    .card {
-      background: white;
-      padding: 25px;
-      border-radius: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    .hero,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(18px);
     }
 
-    h1, h2 {
-      text-align: center;
+    .hero {
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      right: -70px;
+      top: -70px;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.5), rgba(168, 85, 247, 0.45));
+      border-radius: 999px;
+      filter: blur(8px);
+      opacity: 0.6;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      color: #bae6fd;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    h1 {
+      margin: 18px 0 8px;
+      font-size: 42px;
+      line-height: 1.05;
+      letter-spacing: -1px;
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      font-size: 22px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin: 0 0 24px;
+      font-size: 16px;
+    }
+
+    .timer-card {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      margin: 22px 0;
+    }
+
+    .timer-icon {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(34, 197, 94, 0.18));
+      font-size: 28px;
+    }
+
+    .timer-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .timer {
+      font-size: 34px;
+      font-weight: 900;
+      color: var(--blue);
+      letter-spacing: -0.5px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     button {
       cursor: pointer;
       border: none;
-      border-radius: 10px;
-      padding: 12px 18px;
-      font-size: 15px;
-      font-weight: bold;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 800;
       color: white;
-      background: #16a34a;
-      margin: 5px;
+      background: var(--green);
+      transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
     }
 
     button:hover {
-      opacity: 0.9;
+      transform: translateY(-1px);
+      opacity: 0.93;
     }
 
-    .danger {
-      background: #e11d48;
+    .danger { background: var(--red); }
+    .gray { background: var(--gray); }
+    .yellow { background: var(--yellow); }
+    .purple { background: var(--purple); }
+
+    .panel {
+      padding: 22px;
+      margin-bottom: 22px;
     }
 
-    .gray {
-      background: #6b7280;
+    .grid-panels {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 22px;
     }
 
-    .yellow {
-      background: #f59e0b;
+    .profile-box {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
     }
 
-    select, input {
-      padding: 12px;
-      font-size: 15px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
+    .info-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--panel-light);
+      border: 1px solid var(--border);
+    }
+
+    .info-line span:first-child {
+      color: var(--muted);
     }
 
     .status {
-      font-weight: bold;
-      color: #2563eb;
+      font-weight: 900;
+      color: var(--blue);
     }
 
-    .online-dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      background: #22c55e;
-      border-radius: 50%;
-      margin-right: 8px;
-    }
-
-    .offline-dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      background: #cbd5e1;
-      border-radius: 50%;
-      margin-right: 8px;
-    }
-
-    .timer {
-      text-align: center;
-      font-size: 28px;
-      color: #2563eb;
-      font-weight: bold;
-      margin: 15px 0;
-    }
-
-    .chat-box {
-      height: 230px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 12px;
-      background: #fafafa;
-      margin-bottom: 10px;
-    }
-
-    .chat-input {
+    .status-control {
       display: flex;
-      gap: 8px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    .chat-input input {
-      flex: 1;
+    select,
+    input {
+      width: 100%;
+      padding: 13px 14px;
+      font-size: 15px;
+      color: var(--text);
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      outline: none;
     }
 
-    .chat-input button {
-      margin: 0;
+    select {
+      max-width: 220px;
+    }
+
+    .users-list {
+      display: grid;
+      gap: 10px;
     }
 
     .user-row {
-      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 14px;
+      border-radius: 16px;
+      background: var(--panel-light);
+      border: 1px solid var(--border);
     }
 
-    .center {
+    .user-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .online-dot,
+    .offline-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex: 0 0 11px;
+    }
+
+    .online-dot {
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.13);
+    }
+
+    .offline-dot {
+      background: #64748b;
+    }
+
+    .user-name {
+      font-weight: 900;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-meta {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: right;
+    }
+
+    .chat-box {
+      height: 315px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 14px;
+      background: rgba(2, 6, 23, 0.38);
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message {
+      max-width: 88%;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.09);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      line-height: 1.35;
+    }
+
+    .message strong {
+      display: block;
+      color: #bae6fd;
+      margin-bottom: 3px;
+      font-size: 13px;
+    }
+
+    .message.mine {
+      align-self: flex-end;
+      background: rgba(34, 197, 94, 0.16);
+      border-color: rgba(34, 197, 94, 0.25);
+    }
+
+    .chat-input {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .empty-state {
+      color: var(--muted);
       text-align: center;
+      padding: 22px;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding: 16px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 32px;
+      }
+
+      .timer {
+        font-size: 28px;
+      }
+
+      .chat-input {
+        grid-template-columns: 1fr;
+      }
+
+      select {
+        max-width: none;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <div class="card">
-      <h1>Монитор статусов на Supabase</h1>
+  <div class="layout">
+    <main>
+      <section class="hero">
+        <div class="hero-content">
+          <div class="badge">⚡ Supabase Live Monitor</div>
+          <h1>Учебный статус<br>в реальном времени</h1>
+          <p class="subtitle">Google-вход, онлайн-индикаторы, таймер учёбы и общий чат группы.</p>
 
-      <h2 id="userNameTitle">Вы не вошли</h2>
+          <h2 id="userNameTitle">Вы не вошли</h2>
 
-      <div class="timer">
-        ⏱️ <span id="studyTimer">0 сек.</span>
-      </div>
+          <div class="timer-card">
+            <div class="timer-icon">⏱️</div>
+            <div>
+              <div class="timer-label">Время в статусе «На учебе»</div>
+              <div class="timer" id="studyTimer">0 сек.</div>
+            </div>
+          </div>
 
-      <div class="center">
-        <button onclick="signInWithGoogle()">Войти через Google</button>
-        <button class="danger" onclick="finishSession()">⛔ Завершить сессию</button>
-        <button class="yellow" onclick="setBreak()">☕ Перерыв</button>
-        <button class="gray" onclick="signOut()">Выход</button>
-      </div>
-    </div>
+          <div class="actions">
+            <button onclick="signInWithGoogle()">Войти через Google</button>
+            <button class="danger" onclick="finishSession()">⛔ Завершить сессию</button>
+            <button class="yellow" onclick="setBreak()">☕ Перерыв</button>
+            <button class="gray" onclick="signOut()">Выход</button>
+          </div>
+        </div>
+      </section>
 
-    <div class="card">
-      <h2>Мой статус</h2>
+      <section class="panel">
+        <h2>Мой профиль</h2>
+        <div class="profile-box">
+          <div class="info-line">
+            <span>Имя</span>
+            <strong id="myName">Загрузка...</strong>
+          </div>
 
-      <p><strong>Имя:</strong> <span id="myName">Загрузка...</span></p>
-      <p><strong>Статус:</strong> <span class="status" id="myStatus">Загрузка...</span></p>
+          <div class="info-line">
+            <span>Статус</span>
+            <strong class="status" id="myStatus">Загрузка...</strong>
+          </div>
 
-      <select id="statusSelect">
-        <option value="На учебе">На учебе</option>
-        <option value="Дома">Дома</option>
-        <option value="На улице">На улице</option>
-        <option value="Отдыхаю">Отдыхаю</option>
-        <option value="Перерыв">Перерыв</option>
-      </select>
+          <div class="status-control">
+            <select id="statusSelect">
+              <option value="На учебе">На учебе</option>
+              <option value="Дома">Дома</option>
+              <option value="На улице">На улице</option>
+              <option value="Отдыхаю">Отдыхаю</option>
+              <option value="Перерыв">Перерыв</option>
+            </select>
+            <button class="purple" onclick="updateStatus()">Сохранить статус</button>
+          </div>
+        </div>
+      </section>
+    </main>
 
-      <button onclick="updateStatus()">Обновить статус</button>
-    </div>
+    <aside class="grid-panels">
+      <section class="panel">
+        <h2>👥 Группа онлайн</h2>
+        <div class="users-list" id="profilesList">Загрузка...</div>
+      </section>
 
-    <div class="card">
-      <h2>👥 Монитор группы</h2>
-      <div id="profilesList">Загрузка...</div>
-    </div>
-
-    <div class="card">
-      <h2>💬 Общий чат</h2>
-
-      <div class="chat-box" id="chatBox">
-        Загрузка сообщений...
-      </div>
-
-      <div class="chat-input">
-        <input id="messageInput" type="text" placeholder="Сообщение..." />
-        <button onclick="sendMessage()">➤</button>
-      </div>
-    </div>
+      <section class="panel">
+        <h2>💬 Общий чат</h2>
+        <div class="chat-box" id="chatBox">Загрузка сообщений...</div>
+        <div class="chat-input">
+          <input id="messageInput" type="text" placeholder="Напишите сообщение..." />
+          <button onclick="sendMessage()">Отправить ➤</button>
+        </div>
+      </section>
+    </aside>
   </div>
 
   <script type="module">
@@ -305,21 +553,23 @@
         const div = document.createElement("div");
         div.className = "user-row";
 
-        const dot = profile.is_online
-          ? `<span class="online-dot"></span>`
-          : `<span class="offline-dot"></span>`;
+        const dotClass = profile.is_online ? "online-dot" : "offline-dot";
 
         let timeText = "";
 
         if (profile.status === "На учебе" && profile.study_started_at) {
-          timeText = ` — ${formatStudyTime(profile.study_started_at)}`;
+          timeText = formatStudyTime(profile.study_started_at);
         }
 
         div.innerHTML = `
-          ${dot}
-          <strong>${profile.username}</strong>:
-          <span class="status">${profile.status}</span>
-          <span>${timeText}</span>
+          <div class="user-left">
+            <span class="${dotClass}"></span>
+            <div>
+              <div class="user-name">${profile.username}</div>
+              <div class="status">${profile.status}</div>
+            </div>
+          </div>
+          <div class="user-meta">${timeText}</div>
         `;
 
         list.appendChild(div);
@@ -447,9 +697,15 @@
       const chatBox = document.getElementById("chatBox");
       chatBox.innerHTML = "";
 
+      if (!data.length) {
+        chatBox.innerHTML = `<div class="empty-state">Сообщений пока нет</div>`;
+        return;
+      }
+
       data.forEach(message => {
         const div = document.createElement("div");
-        div.innerHTML = `<strong>${message.username}:</strong> ${message.text}`;
+        div.className = message.user_id === currentUser?.id ? "message mine" : "message";
+        div.innerHTML = `<strong>${message.username}</strong>${message.text}`;
         chatBox.appendChild(div);
       });
 
