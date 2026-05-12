@@ -4,143 +4,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Монитор статусов Supabase</title>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 25px;
-    }
-
-    .container {
-      max-width: 760px;
-      margin: 0 auto;
-    }
-
-    .card {
-      background: white;
-      padding: 25px;
-      border-radius: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-    }
-
-    h1, h2 {
-      text-align: center;
-    }
-
-    button {
-      cursor: pointer;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 18px;
-      font-size: 15px;
-      font-weight: bold;
-      color: white;
-      background: #16a34a;
-      margin: 5px;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    .danger {
-      background: #e11d48;
-    }
-
-    .gray {
-      background: #6b7280;
-    }
-
-    .yellow {
-      background: #f59e0b;
-    }
-
-    select, input {
-      padding: 12px;
-      font-size: 15px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-    }
-
-    .status {
-      font-weight: bold;
-      color: #2563eb;
-    }
-
-    .online-dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      background: #22c55e;
-      border-radius: 50%;
-      margin-right: 8px;
-    }
-
-    .offline-dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      background: #cbd5e1;
-      border-radius: 50%;
-      margin-right: 8px;
-    }
-
-    .timer {
-      text-align: center;
-      font-size: 28px;
-      color: #2563eb;
-      font-weight: bold;
-      margin: 15px 0;
-    }
-
-    .chat-box {
-      height: 230px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 12px;
-      background: #fafafa;
-      margin-bottom: 10px;
-    }
-
-    .chat-input {
-      display: flex;
-      gap: 8px;
-    }
-
-    .chat-input input {
-      flex: 1;
-    }
-
-    .chat-input button {
-      margin: 0;
-    }
-
-    .user-row {
-      margin: 10px 0;
-    }
-
-    .center {
-      text-align: center;
-    }
+    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 25px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .card { background: white; padding: 25px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+    h1, h2 { text-align: center; }
+    button { cursor: pointer; border: none; border-radius: 10px; padding: 12px 18px; font-size: 15px; font-weight: bold; color: white; background: #16a34a; margin: 5px; }
+    .danger { background: #e11d48; } .gray { background: #6b7280; } .yellow { background: #f59e0b; }
+    .status { font-weight: bold; color: #2563eb; }
+    .online-dot { display: inline-block; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; margin-right: 8px; }
+    .offline-dot { display: inline-block; width: 10px; height: 10px; background: #cbd5e1; border-radius: 50%; margin-right: 8px; }
+    .timer { text-align: center; font-size: 28px; color: #2563eb; font-weight: bold; margin: 15px 0; }
+    .chat-box { height: 230px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px; padding: 12px; background: #fafafa; margin-bottom: 10px; }
+    .chat-input { display: flex; gap: 8px; } .chat-input input { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #ddd; }
+    .user-row { padding: 10px; border-bottom: 1px solid #eee; }
+    
+    /* Стили для ачивок */
+    .badge { display: inline-block; background: #e0e7ff; color: #4338ca; padding: 3px 8px; border-radius: 12px; font-size: 12px; margin: 2px; border: 1px solid #c7d2fe; }
+    .leader-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-radius: 8px; margin-bottom: 5px; background: #fff; border: 1px solid #eee; }
+    .top-1 { background: #fffbeb; border-color: #fcd34d; }
   </style>
 </head>
-
 <body>
   <div class="container">
     <div class="card">
       <h1>Монитор статусов на Supabase</h1>
-
       <h2 id="userNameTitle">Вы не вошли</h2>
-
-      <div class="timer">
-        ⏱️ <span id="studyTimer">0 сек.</span>
-      </div>
-
-      <div class="center">
+      <div class="timer">⏱️ <span id="studyTimer">0 сек.</span></div>
+      <div class="center" style="text-align: center;">
         <button onclick="signInWithGoogle()">Войти через Google</button>
         <button class="danger" onclick="finishSession()">⛔ Завершить сессию</button>
         <button class="yellow" onclick="setBreak()">☕ Перерыв</button>
@@ -149,36 +40,34 @@
     </div>
 
     <div class="card">
-      <h2>Мой статус</h2>
-
-      <p><strong>Имя:</strong> <span id="myName">Загрузка...</span></p>
-      <p><strong>Статус:</strong> <span class="status" id="myStatus">Загрузка...</span></p>
-
-      <select id="statusSelect">
-        <option value="На учебе">На учебе</option>
-        <option value="Дома">Дома</option>
-        <option value="На улице">На улице</option>
-        <option value="Отдыхаю">Отдыхаю</option>
-        <option value="Перерыв">Перерыв</option>
-      </select>
-
-      <button onclick="updateStatus()">Обновить статус</button>
+      <h2>🏆 Рейтинг (Топ по учебе)</h2>
+      <div id="leaderboard">Загрузка...</div>
     </div>
 
     <div class="card">
-      <h2>👥 Монитор группы</h2>
-      <div id="profilesList">Загрузка...</div>
+      <h2>Мой профиль</h2>
+      <p><strong>Статус:</strong> <span class="status" id="myStatus">-</span></p>
+      <div id="myAchievements"></div>
+      <br>
+      <select id="statusSelect" style="padding: 10px; border-radius: 10px;">
+        <option value="На учебе">На учебе</option>
+        <option value="Перерыв">Перерыв</option>
+        <option value="Отдыхаю">Отдыхаю</option>
+        <option value="Дома">Дома</option>
+      </select>
+      <button onclick="updateStatus()">Обновить</button>
+    </div>
+
+    <div class="card">
+      <h2>👥 Группа и Достижения</h2>
+      <div id="profilesList"></div>
     </div>
 
     <div class="card">
       <h2>💬 Общий чат</h2>
-
-      <div class="chat-box" id="chatBox">
-        Загрузка сообщений...
-      </div>
-
+      <div class="chat-box" id="chatBox"></div>
       <div class="chat-input">
-        <input id="messageInput" type="text" placeholder="Сообщение..." />
+        <input id="messageInput" type="text" placeholder="Написать..." />
         <button onclick="sendMessage()">➤</button>
       </div>
     </div>
@@ -189,369 +78,176 @@
 
     const supabaseUrl = "https://aocsygtduocsqevgbpqg.supabase.co";
     const supabaseKey = "sb_publishable_XRbpecmnfjdB-El_Y_rT5w_EK6Hb1c2";
-
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     let currentUser = null;
     let currentProfile = null;
     let timerInterval = null;
 
-    async function signInWithGoogle() {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: "https://petrosyan1488.github.io/supabase-status-monitor/"
-        }
-      });
+    // Словарь названий достижений
+    const BADGES = {
+      'first_step': '🐣 Первый шаг',
+      'early_bird': '🐦 Ранняя пташка',
+      'night_owl': '🦉 Ночная сова',
+      'activist': '💬 Активист',
+      'marathon': '🏃 Марафонец',
+      'study_machine': '🔥 Машина учебы',
+      'sociable': '🎯 Общительный',
+      'legend': '👑 Легенда чата',
+      'fast_start': '⚡ Быстрый старт',
+      'no_rest': '☕ Без отдыха'
+    };
 
-      if (error) {
-        alert("Ошибка входа: " + error.message);
-      }
-    }
-
-    async function signOut() {
-      if (currentUser) {
-        await supabase
-          .from("profiles2")
-          .update({ is_online: false })
-          .eq("id", currentUser.id);
-      }
-
-      await supabase.auth.signOut();
-      location.reload();
+    async function giveAchievement(type) {
+      if (!currentUser) return;
+      await supabase.from('achievements').insert([{ user_id: currentUser.id, achievement_type: type }]).maybeSingle();
     }
 
     async function ensureProfile(user) {
-      const username =
-        user.user_metadata?.full_name ||
-        user.user_metadata?.name ||
-        user.email ||
-        "Без имени";
+      const { data: profile } = await supabase.from("profiles2").select("*").eq("id", user.id).maybeSingle();
+      const now = new Date();
+      const hour = now.getHours();
 
-      const { data } = await supabase
-        .from("profiles2")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (!data) {
-        await supabase.from("profiles2").insert([
-          {
-            id: user.id,
-            username: username,
-            status: "На учебе",
-            is_online: true,
-            study_started_at: new Date().toISOString()
-          }
-        ]);
+      if (!profile) {
+        await supabase.from("profiles2").insert([{
+          id: user.id,
+          username: user.user_metadata?.full_name || user.email,
+          status: "На учебе",
+          is_online: true,
+          study_started_at: now.toISOString(),
+          last_login_at: now.toISOString()
+        }]);
+        await giveAchievement('first_step');
       } else {
-        const updateData = { is_online: true };
-
-        if (data.status === "На учебе" && !data.study_started_at) {
-          updateData.study_started_at = new Date().toISOString();
-        }
-
-        await supabase
-          .from("profiles2")
-          .update(updateData)
-          .eq("id", user.id);
+        await supabase.from("profiles2").update({ is_online: true, last_login_at: now.toISOString() }).eq("id", user.id);
+        if (hour < 8) await giveAchievement('early_bird');
+        if (hour >= 0 && hour < 4) await giveAchievement('night_owl');
       }
-    }
-
-    async function loadMyProfile() {
-      if (!currentUser) {
-        document.getElementById("myName").textContent = "Вы не вошли";
-        document.getElementById("myStatus").textContent = "-";
-        document.getElementById("userNameTitle").textContent = "Вы не вошли";
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("profiles2")
-        .select("*")
-        .eq("id", currentUser.id)
-        .maybeSingle();
-
-      if (error) {
-        document.getElementById("myStatus").textContent = error.message;
-        return;
-      }
-
-      currentProfile = data;
-
-      document.getElementById("myName").textContent = data.username;
-      document.getElementById("myStatus").textContent = data.status;
-      document.getElementById("userNameTitle").textContent = data.username;
-      document.getElementById("statusSelect").value = data.status;
-
-      startTimer();
-    }
-
-    async function loadAllProfiles() {
-      const { data, error } = await supabase
-        .from("profiles2")
-        .select("*")
-        .order("username", { ascending: true });
-
-      if (error) {
-        document.getElementById("profilesList").textContent = error.message;
-        return;
-      }
-
-      const list = document.getElementById("profilesList");
-      list.innerHTML = "";
-
-      data.forEach(profile => {
-        const div = document.createElement("div");
-        div.className = "user-row";
-
-        const dot = profile.is_online
-          ? `<span class="online-dot"></span>`
-          : `<span class="offline-dot"></span>`;
-
-        let timeText = "";
-
-        if (profile.status === "На учебе" && profile.study_started_at) {
-          timeText = ` — ${formatStudyTime(profile.study_started_at)}`;
-        }
-
-        div.innerHTML = `
-          ${dot}
-          <strong>${profile.username}</strong>:
-          <span class="status">${profile.status}</span>
-          <span>${timeText}</span>
-        `;
-
-        list.appendChild(div);
-      });
-    }
-
-    async function updateStatus() {
-      if (!currentUser) {
-        alert("Сначала войдите через Google");
-        return;
-      }
-
-      const newStatus = document.getElementById("statusSelect").value;
-
-      const updateData = {
-        status: newStatus,
-        is_online: true
-      };
-
-      if (newStatus === "На учебе") {
-        updateData.study_started_at = new Date().toISOString();
-      } else {
-        updateData.study_started_at = null;
-      }
-
-      const { error } = await supabase
-        .from("profiles2")
-        .update(updateData)
-        .eq("id", currentUser.id);
-
-      if (error) {
-        alert("Ошибка обновления: " + error.message);
-        return;
-      }
-
-      await loadMyProfile();
-      await loadAllProfiles();
-    }
-
-    async function setBreak() {
-      if (!currentUser) return alert("Сначала войдите через Google");
-
-      await supabase
-        .from("profiles2")
-        .update({
-          status: "Перерыв",
-          study_started_at: null,
-          is_online: true
-        })
-        .eq("id", currentUser.id);
-
-      await loadMyProfile();
-      await loadAllProfiles();
     }
 
     async function finishSession() {
-      if (!currentUser) return alert("Сначала войдите через Google");
+      if (!currentUser || !currentProfile) return;
+      let diff = 0;
+      if (currentProfile.study_started_at) {
+        diff = Math.floor((new Date() - new Date(currentProfile.study_started_at)) / 1000);
+      }
 
-      await supabase
-        .from("profiles2")
-        .update({
-          status: "Дома",
-          is_online: false,
-          study_started_at: null
-        })
-        .eq("id", currentUser.id);
+      const newTotal = (currentProfile.total_study_time_sec || 0) + diff;
+      await supabase.from("profiles2").update({
+        status: "Дома", is_online: false, study_started_at: null, total_study_time_sec: newTotal
+      }).eq("id", currentUser.id);
 
-      await loadMyProfile();
-      await loadAllProfiles();
+      if (diff >= 7200) await giveAchievement('marathon'); // 2 часа
+      if (diff >= 18000) await giveAchievement('study_machine'); // 5 часов
+      
+      await loadData();
     }
 
+    async function sendMessage() {
+      const input = document.getElementById("messageInput");
+      const text = input.value.trim();
+      if (!text || !currentUser) return;
+
+      const now = new Date();
+      const { error } = await supabase.from("messages").insert([{
+        user_id: currentUser.id, username: currentProfile.username, text: text
+      }]);
+
+      if (!error) {
+        const newCount = (currentProfile.message_count || 0) + 1;
+        await supabase.from("profiles2").update({ message_count: newCount, last_message_at: now.toISOString() }).eq("id", currentUser.id);
+        
+        // Проверка ачивок чата
+        if (newCount >= 20) await giveAchievement('activist');
+        if (newCount >= 50) await giveAchievement('sociable');
+        if (newCount >= 100) await giveAchievement('legend');
+
+        // Быстрый старт (написал в течение 1 минуты после входа)
+        const loginTime = new Date(currentProfile.last_login_at);
+        if ((now - loginTime) < 60000) await giveAchievement('fast_start');
+
+        input.value = "";
+        loadMessages();
+      }
+    }
+
+    async function loadData() {
+      if (!currentUser) return;
+      const { data: profile } = await supabase.from("profiles2").select("*, achievements(achievement_type)").eq("id", currentUser.id).maybeSingle();
+      currentProfile = profile;
+      
+      document.getElementById("userNameTitle").textContent = profile.username;
+      document.getElementById("myStatus").textContent = profile.status;
+      document.getElementById("myAchievements").innerHTML = profile.achievements.map(a => `<span class="badge">${BADGES[a.achievement_type] || a.achievement_type}</span>`).join('');
+
+      // Загрузка всех для списка и рейтинга
+      const { data: all } = await supabase.from("profiles2").select("*, achievements(achievement_type)").order("total_study_time_sec", { ascending: false });
+      
+      const leaderboard = document.getElementById("leaderboard");
+      leaderboard.innerHTML = all.slice(0, 5).map((p, i) => `
+        <div class="leader-item ${i===0?'top-1':''}">
+          <span>#${i+1} <strong>${p.username}</strong></span>
+          <span>${Math.floor(p.total_study_time_sec/3600)} ч.</span>
+        </div>
+      `).join('');
+
+      const list = document.getElementById("profilesList");
+      list.innerHTML = all.map(p => `
+        <div class="user-row">
+          ${p.is_online ? '<span class="online-dot"></span>' : '<span class="offline-dot"></span>'}
+          <strong>${p.username}</strong>: ${p.status}
+          <div>${p.achievements.map(a => `<span class="badge">${BADGES[a.achievement_type] || a.achievement_type}</span>`).join('')}</div>
+        </div>
+      `).join('');
+    }
+
+    // --- Остальные функции (таймер, вход, сообщения) ---
     function startTimer() {
       clearInterval(timerInterval);
-
       timerInterval = setInterval(() => {
-        if (
-          currentProfile &&
-          currentProfile.status === "На учебе" &&
-          currentProfile.study_started_at
-        ) {
-          document.getElementById("studyTimer").textContent =
-            formatStudyTime(currentProfile.study_started_at);
-        } else {
-          document.getElementById("studyTimer").textContent = "0 сек.";
+        if (currentProfile?.status === "На учебе" && currentProfile.study_started_at) {
+          const sec = Math.floor((new Date() - new Date(currentProfile.study_started_at)) / 1000);
+          document.getElementById("studyTimer").textContent = sec + " сек.";
+          if (sec > 10800) giveAchievement('no_rest'); // 3 часа без перерыва
         }
       }, 1000);
     }
 
-    function formatStudyTime(startTime) {
-      const start = new Date(startTime);
-      const now = new Date();
-
-      let seconds = Math.floor((now - start) / 1000);
-      if (seconds < 0) seconds = 0;
-
-      const hours = Math.floor(seconds / 3600);
-      seconds %= 3600;
-
-      const minutes = Math.floor(seconds / 60);
-      seconds %= 60;
-
-      if (hours > 0) {
-        return `${hours} ч ${minutes} м ${seconds} с`;
-      }
-
-      if (minutes > 0) {
-        return `${minutes} м ${seconds} с`;
-      }
-
-      return `${seconds} сек.`;
+    async function signInWithGoogle() { 
+        await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.href } }); 
     }
-
+    async function signOut() { 
+        await supabase.from("profiles2").update({ is_online: false }).eq("id", currentUser.id);
+        await supabase.auth.signOut(); location.reload(); 
+    }
+    async function updateStatus() {
+      const s = document.getElementById("statusSelect").value;
+      await supabase.from("profiles2").update({ status: s, study_started_at: s === "На учебе" ? new Date().toISOString() : null }).eq("id", currentUser.id);
+      loadData();
+    }
     async function loadMessages() {
-      const { data, error } = await supabase
-        .from("messages")
-        .select("*")
-        .order("created_at", { ascending: true })
-        .limit(50);
-
-      if (error) {
-        document.getElementById("chatBox").textContent = error.message;
-        return;
-      }
-
-      const chatBox = document.getElementById("chatBox");
-      chatBox.innerHTML = "";
-
-      data.forEach(message => {
-        const div = document.createElement("div");
-        div.innerHTML = `<strong>${message.username}:</strong> ${message.text}`;
-        chatBox.appendChild(div);
-      });
-
-      chatBox.scrollTop = chatBox.scrollHeight;
+      const { data } = await supabase.from("messages").select("*").order("created_at", { ascending: true }).limit(50);
+      document.getElementById("chatBox").innerHTML = data.map(m => `<div><strong>${m.username}:</strong> ${m.text}</div>`).join('');
+      document.getElementById("chatBox").scrollTop = 9999;
     }
 
-    async function sendMessage() {
-      if (!currentUser || !currentProfile) {
-        alert("Сначала войдите через Google");
-        return;
-      }
-
-      const input = document.getElementById("messageInput");
-      const text = input.value.trim();
-
-      if (!text) return;
-
-      const { error } = await supabase
-        .from("messages")
-        .insert([
-          {
-            user_id: currentUser.id,
-            username: currentProfile.username,
-            text: text
-          }
-        ]);
-
-      if (error) {
-        alert("Ошибка отправки: " + error.message);
-        return;
-      }
-
-      input.value = "";
-      await loadMessages();
-    }
-
-    async function initAuth() {
+    async function init() {
       const { data } = await supabase.auth.getUser();
-      currentUser = data?.user ?? null;
-
+      currentUser = data?.user;
       if (currentUser) {
         await ensureProfile(currentUser);
+        await loadData();
+        await loadMessages();
+        startTimer();
       }
-
-      await loadMyProfile();
-      await loadAllProfiles();
-      await loadMessages();
     }
 
-    supabase.auth.onAuthStateChange(async () => {
-      await initAuth();
-    });
-
-    supabase
-      .channel("profiles2-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "profiles2" },
-        async () => {
-          await loadMyProfile();
-          await loadAllProfiles();
-        }
-      )
-      .subscribe();
-
-    supabase
-      .channel("messages-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "messages" },
-        async () => {
-          await loadMessages();
-        }
-      )
-      .subscribe();
-
-    window.signInWithGoogle = signInWithGoogle;
-    window.signOut = signOut;
-    window.updateStatus = updateStatus;
-    window.setBreak = setBreak;
-    window.finishSession = finishSession;
-    window.sendMessage = sendMessage;
-
-    window.addEventListener("beforeunload", async () => {
-      if (currentUser) {
-        await supabase
-          .from("profiles2")
-          .update({ is_online: false })
-          .eq("id", currentUser.id);
-      }
-    });
-
-    document.addEventListener("keydown", event => {
-      if (event.key === "Enter") {
-        const input = document.getElementById("messageInput");
-        if (document.activeElement === input) {
-          sendMessage();
-        }
-      }
-    });
-
-    initAuth();
+    window.signInWithGoogle = signInWithGoogle; window.signOut = signOut;
+    window.updateStatus = updateStatus; window.finishSession = finishSession;
+    window.sendMessage = sendMessage; window.setBreak = () => { document.getElementById("statusSelect").value = "Перерыв"; updateStatus(); };
+    
+    init();
+    supabase.channel('realtm').on('postgres_changes', { event: '*', schema: 'public' }, () => { loadData(); loadMessages(); }).subscribe();
   </script>
 </body>
 </html>
