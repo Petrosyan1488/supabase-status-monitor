@@ -5,76 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Монитор статусов Supabase</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 25px; }
-    .container { max-width: 760px; margin: 0 auto; }
-    .card { background: white; padding: 25px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
-    h1, h2 { text-align: center; }
-    button { cursor: pointer; border: none; border-radius: 10px; padding: 12px 18px; font-size: 15px; font-weight: bold; color: white; background: #16a34a; margin: 5px; }
-    button:hover { opacity: 0.9; }
-    .danger { background: #e11d48; } .gray { background: #6b7280; } .yellow { background: #f59e0b; }
-    select, input { padding: 12px; font-size: 15px; border: 1px solid #ddd; border-radius: 10px; }
-    .status { font-weight: bold; color: #2563eb; }
-    .online-dot { display: inline-block; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; margin-right: 8px; }
-    .offline-dot { display: inline-block; width: 10px; height: 10px; background: #cbd5e1; border-radius: 50%; margin-right: 8px; }
-    .timer { text-align: center; font-size: 28px; color: #2563eb; font-weight: bold; margin: 15px 0; }
-    .chat-box { height: 230px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px; padding: 12px; background: #fafafa; margin-bottom: 10px; }
-    .chat-input { display: flex; gap: 8px; } .chat-input input { flex: 1; }
-    .user-row { margin: 10px 0; padding: 10px; border-bottom: 1px solid #eee; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .card { background: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    h1, h2 { text-align: center; color: #1e293b; }
     .center { text-align: center; }
     
-    /* Достижения и Рейтинг */
-    .badge { display: inline-block; background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin: 2px; border: 1px solid #c7d2fe; font-weight: bold; }
-    .leader-row { display: flex; justify-content: space-between; padding: 10px; background: #f9fafb; border-radius: 10px; margin-bottom: 5px; border: 1px solid #eee; }
-    .top-1 { background: #fffbeb; border-color: #fcd34d; }
+    button { cursor: pointer; border: none; border-radius: 10px; padding: 12px 20px; font-weight: bold; color: white; background: #10b981; margin: 5px; transition: 0.2s; }
+    button:hover { opacity: 0.9; transform: translateY(-1px); }
+    .danger { background: #ef4444; } .gray { background: #64748b; } .yellow { background: #f59e0b; }
+    
+    .timer { text-align: center; font-size: 32px; color: #2563eb; font-weight: 800; margin: 15px 0; background: #eff6ff; padding: 10px; border-radius: 12px; }
+    
+    /* Сетка достижений */
+    .achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-top: 15px; }
+    .ach-item { padding: 15px; border-radius: 12px; text-align: center; background: #f8fafc; border: 2px solid #e2e8f0; transition: 0.3s; filter: grayscale(1); opacity: 0.4; }
+    .ach-item.earned { filter: grayscale(0); opacity: 1; border-color: #3b82f6; background: #eff6ff; }
+    .ach-icon { font-size: 24px; display: block; margin-bottom: 5px; }
+    .ach-name { font-size: 11px; font-weight: bold; line-height: 1.2; }
+
+    /* Рейтинг */
+    .leader-row { display: flex; justify-content: space-between; padding: 12px; background: #f1f5f9; border-radius: 10px; margin-bottom: 8px; font-weight: 500; }
+    .top-1 { background: #fef3c7; border: 1px solid #f59e0b; }
+
+    .chat-box { height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; background: #fff; margin-bottom: 10px; }
+    .user-row { padding: 10px; border-bottom: 1px solid #f1f5f9; }
+    .badge-mini { font-size: 10px; background: #dbeafe; color: #1e40af; padding: 2px 6px; border-radius: 8px; margin-right: 3px; }
+    select { padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; width: 150px; }
   </style>
 </head>
 
 <body>
   <div class="container">
     <div class="card">
-      <h1>Монитор статусов на Supabase</h1>
-      <h2 id="userNameTitle">Вы не вошли</h2>
-      <div class="timer">⏱️ <span id="studyTimer">0 сек.</span></div>
+      <h1 id="userNameTitle">Загрузка...</h1>
+      <div class="timer" id="studyTimer">0 сек.</div>
       <div class="center">
         <button onclick="signInWithGoogle()">Войти через Google</button>
-        <button class="danger" onclick="finishSession()">⛔ Завершить сессию</button>
-        <button class="yellow" onclick="setBreak()">☕ Перерыв</button>
+        <button class="danger" onclick="finishSession()">⛔ Завершить</button>
+        <button class="yellow" onclick="window.setBreak()">☕ Перерыв</button>
         <button class="gray" onclick="signOut()">Выход</button>
       </div>
     </div>
 
     <div class="card">
-      <h2>🏆 Рейтинг ТОП-5</h2>
-      <div id="leaderboard">Загрузка рейтинга...</div>
+      <h2>🏆 Топ Студентов</h2>
+      <div id="leaderboard"></div>
     </div>
 
     <div class="card">
-      <h2>Мой профиль</h2>
-      <p><strong>Статус:</strong> <span class="status" id="myStatus">Загрузка...</span></p>
-      <p><strong>Общее время учебы:</strong> <span id="totalStudyTime">0 ч 0 м</span></p>
-      <p><strong>Мои награды:</strong></p>
-      <div id="myAchievements">Загрузка...</div>
-      <br>
+      <h2>🏅 Мои Достижения</h2>
+      <div class="achievements-grid" id="achievementsGrid">
+        </div>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ Управление статусом</h2>
+      <p>Общее время: <strong id="totalStudyTime">0 сек.</strong></p>
       <select id="statusSelect">
         <option value="На учебе">На учебе</option>
         <option value="Дома">Дома</option>
-        <option value="На улице">На улице</option>
-        <option value="Отдыхаю">Отдыхаю</option>
         <option value="Перерыв">Перерыв</option>
       </select>
       <button onclick="updateStatus()">Обновить</button>
     </div>
 
     <div class="card">
-      <h2>👥 Монитор группы</h2>
-      <div id="profilesList">Загрузка...</div>
+      <h2>👥 Группа</h2>
+      <div id="profilesList"></div>
     </div>
 
     <div class="card">
-      <h2>💬 Общий чат</h2>
-      <div class="chat-box" id="chatBox">Загрузка сообщений...</div>
-      <div class="chat-input">
-        <input id="messageInput" type="text" placeholder="Сообщение..." />
+      <h2>💬 Чат</h2>
+      <div class="chat-box" id="chatBox"></div>
+      <div style="display:flex; gap:5px;">
+        <input id="messageInput" type="text" style="flex:1; padding:10px; border-radius:8px; border:1px solid #ddd;" placeholder="Сообщение..." />
         <button onclick="sendMessage()">➤</button>
       </div>
     </div>
@@ -87,187 +92,129 @@
     const supabaseKey = "sb_publishable_XRbpecmnfjdB-El_Y_rT5w_EK6Hb1c2";
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    let currentUser = null;
-    let currentProfile = null;
-    let timerInterval = null;
+    let currentUser = null, currentProfile = null, timerInterval = null;
 
-    const BADGES = {
-      'first_step': '🐣 Первый шаг', 'early_bird': '🐦 Ранняя пташка', 'night_owl': '🦉 Ночная сова',
-      'activist': '💬 Активист', 'marathon': '🏃 Марафонец', 'study_machine': '🔥 Машина учебы',
-      'sociable': '🎯 Общительный', 'legend': '👑 Легенда чата', 'fast_start': '⚡ Быстрый старт', 'no_rest': '☕ Без отдыха'
-    };
+    const ALL_ACHIEVEMENTS = [
+      { id: 'first_step', name: 'Первый шаг', icon: '🐣' },
+      { id: 'early_bird', name: 'Ранняя пташка', icon: '🐦' },
+      { id: 'night_owl', name: 'Ночная сова', icon: '🦉' },
+      { id: 'activist', name: 'Активист', icon: '💬' },
+      { id: 'marathon', name: 'Марафонец', icon: '🏃' },
+      { id: 'study_machine', name: 'Машина учебы', icon: '🔥' },
+      { id: 'sociable', name: 'Общительный', icon: '🎯' },
+      { id: 'legend', name: 'Король чата', icon: '👑' },
+      { id: 'fast_start', name: 'Быстрый старт', icon: '⚡' },
+      { id: 'no_rest', name: 'Без отдыха', icon: '☕' }
+    ];
 
-    function formatTime(totalSeconds) {
-      if (!totalSeconds || totalSeconds < 0) return "0 сек.";
-      const h = Math.floor(totalSeconds / 3600);
-      const m = Math.floor((totalSeconds % 3600) / 60);
-      const s = totalSeconds % 60;
-      if (h > 0) return `${h} ч ${m} м ${s} с`;
-      if (m > 0) return `${m} м ${s} с`;
-      return `${s} сек.`;
-    }
-
-    async function giveAchievement(type) {
-      if (!currentUser) return;
-      await supabase.from('achievements').insert([{ user_id: currentUser.id, achievement_type: type }]).maybeSingle();
-    }
-
-    async function signInWithGoogle() {
-      await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.href } });
-    }
-
-    async function signOut() {
-      if (currentUser) await supabase.from("profiles2").update({ is_online: false }).eq("id", currentUser.id);
-      await supabase.auth.signOut();
-      location.reload();
-    }
-
-    async function ensureProfile(user) {
-      const { data: profile } = await supabase.from("profiles2").select("*").eq("id", user.id).maybeSingle();
-      const now = new Date();
-      const hour = now.getHours();
-
-      if (!profile) {
-        await supabase.from("profiles2").insert([{
-          id: user.id, username: user.user_metadata?.full_name || user.email,
-          status: "На учебе", is_online: true, study_started_at: now.toISOString(), last_login_at: now.toISOString()
-        }]);
-        await giveAchievement('first_step');
-      } else {
-        await supabase.from("profiles2").update({ is_online: true, last_login_at: now.toISOString() }).eq("id", user.id);
-        if (hour < 8) await giveAchievement('early_bird');
-        if (hour >= 0 && hour < 4) await giveAchievement('night_owl');
-      }
+    function fmt(s) {
+      if (!s || s <= 0) return "0 сек.";
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+      return h > 0 ? `${h}ч ${m}м ${sec}с` : m > 0 ? `${m}м ${sec}с` : `${sec}с`;
     }
 
     async function loadData() {
       if (!currentUser) return;
-
-      // 1. Загружаем мой профиль и мои ачивки
       const { data: profile } = await supabase.from("profiles2").select("*, achievements(achievement_type)").eq("id", currentUser.id).maybeSingle();
       currentProfile = profile;
       
       document.getElementById("userNameTitle").textContent = profile.username;
-      document.getElementById("myStatus").textContent = profile.status;
-      document.getElementById("totalStudyTime").textContent = formatTime(profile.total_study_time_sec);
-      document.getElementById("myAchievements").innerHTML = profile.achievements?.map(a => `<span class="badge">${BADGES[a.achievement_type] || a.achievement_type}</span>`).join('') || "Пока нет наград";
+      document.getElementById("totalStudyTime").textContent = fmt(profile.total_study_time_sec);
 
-      // 2. Загружаем всех пользователей для Группы и Рейтинга
-      const { data: all } = await supabase.from("profiles2").select("*, achievements(achievement_type)").order("total_study_time_sec", { ascending: false });
-      
-      // Рейтинг ТОП-5
-      const leaderboard = document.getElementById("leaderboard");
-      leaderboard.innerHTML = all.slice(0, 5).map((p, i) => `
-        <div class="leader-row ${i === 0 ? 'top-1' : ''}">
-          <span>#${i + 1} <strong>${p.username}</strong></span>
-          <span><strong>${formatTime(p.total_study_time_sec)}</strong></span>
+      // Отрисовка сетки ачивок
+      const earnedIds = profile.achievements.map(a => a.achievement_type);
+      document.getElementById("achievementsGrid").innerHTML = ALL_ACHIEVEMENTS.map(ach => `
+        <div class="ach-item ${earnedIds.includes(ach.id) ? 'earned' : ''}">
+          <span class="ach-icon">${ach.icon}</span>
+          <span class="ach-name">${ach.name}</span>
         </div>
       `).join('');
 
-      // Список группы
-      const list = document.getElementById("profilesList");
-      list.innerHTML = all.map(p => `
+      // Рейтинг и список группы
+      const { data: all } = await supabase.from("profiles2").select("*, achievements(achievement_type)").order("total_study_time_sec", { ascending: false });
+      
+      document.getElementById("leaderboard").innerHTML = all.slice(0, 5).map((p, i) => `
+        <div class="leader-row ${i===0?'top-1':''}">
+          <span>#${i+1} ${p.username}</span>
+          <span>${fmt(p.total_study_time_sec)}</span>
+        </div>
+      `).join('');
+
+      document.getElementById("profilesList").innerHTML = all.map(p => `
         <div class="user-row">
-          ${p.is_online ? '<span class="online-dot"></span>' : '<span class="offline-dot"></span>'}
-          <strong>${p.username}</strong>: <span class="status">${p.status}</span>
-          <div style="margin-top:5px;">${p.achievements?.map(a => `<span class="badge">${BADGES[a.achievement_type] || a.achievement_type}</span>`).join('') || ''}</div>
+          <strong>${p.username}</strong>: ${p.status} 
+          <div style="margin-top:4px;">${p.achievements.map(a => `<span class="badge-mini">${ALL_ACHIEVEMENTS.find(x=>x.id===a.achievement_type)?.icon || ''}</span>`).join('')}</div>
         </div>
       `).join('');
     }
 
+    // --- Логика кнопок и времени ---
+    async function giveAch(type) {
+      await supabase.from('achievements').insert([{ user_id: currentUser.id, achievement_type: type }]).maybeSingle();
+    }
+
     async function finishSession() {
-      if (!currentUser || !currentProfile) return;
-      let diff = 0;
-      if (currentProfile.study_started_at) {
-        diff = Math.floor((new Date() - new Date(currentProfile.study_started_at)) / 1000);
-      }
-
+      let diff = currentProfile.study_started_at ? Math.floor((new Date() - new Date(currentProfile.study_started_at)) / 1000) : 0;
       const newTotal = (currentProfile.total_study_time_sec || 0) + diff;
-      await supabase.from("profiles2").update({
-        status: "Дома", is_online: false, study_started_at: null, total_study_time_sec: newTotal
-      }).eq("id", currentUser.id);
-
-      if (diff >= 7200) await giveAchievement('marathon'); 
-      if (diff >= 18000) await giveAchievement('study_machine');
-      
-      await loadData();
+      await supabase.from("profiles2").update({ status: "Дома", is_online: false, study_started_at: null, total_study_time_sec: newTotal }).eq("id", currentUser.id);
+      if (diff >= 7200) await giveAch('marathon');
+      if (diff >= 18000) await giveAch('study_machine');
+      loadData();
     }
 
     async function updateStatus() {
       const s = document.getElementById("statusSelect").value;
-      const updateData = { status: s, is_online: true };
-      if (s === "На учебе") updateData.study_started_at = new Date().toISOString();
-      else updateData.study_started_at = null;
-
-      await supabase.from("profiles2").update(updateData).eq("id", currentUser.id);
-      await loadData();
+      await supabase.from("profiles2").update({ status: s, is_online: true, study_started_at: s === "На учебе" ? new Date().toISOString() : null }).eq("id", currentUser.id);
+      loadData();
     }
 
     async function sendMessage() {
-      const input = document.getElementById("messageInput");
-      const text = input.value.trim();
-      if (!text || !currentUser) return;
-
-      const now = new Date();
-      const { error } = await supabase.from("messages").insert([{
-        user_id: currentUser.id, username: currentProfile.username, text: text
-      }]);
-
-      if (!error) {
-        const newCount = (currentProfile.message_count || 0) + 1;
-        await supabase.from("profiles2").update({ message_count: newCount, last_message_at: now.toISOString() }).eq("id", currentUser.id);
-        
-        if (newCount >= 20) await giveAchievement('activist');
-        if (newCount >= 50) await giveAchievement('sociable');
-        if (newCount >= 100) await giveAchievement('legend');
-
-        const loginTime = new Date(currentProfile.last_login_at);
-        if ((now - loginTime) < 60000) await giveAchievement('fast_start');
-
-        input.value = "";
-        await loadMessages();
-      }
+      const input = document.getElementById("messageInput"), txt = input.value.trim();
+      if (!txt) return;
+      await supabase.from("messages").insert([{ user_id: currentUser.id, username: currentProfile.username, text: txt }]);
+      const newC = (currentProfile.message_count || 0) + 1;
+      await supabase.from("profiles2").update({ message_count: newC }).eq("id", currentUser.id);
+      if (newC >= 20) await giveAch('activist');
+      input.value = ""; loadMessages();
     }
 
     async function loadMessages() {
-      const { data } = await supabase.from("messages").select("*").order("created_at", { ascending: true }).limit(50);
-      const chatBox = document.getElementById("chatBox");
-      chatBox.innerHTML = data.map(m => `<div><strong>${m.username}:</strong> ${m.text}</div>`).join('');
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    function startTimerLoop() {
-      clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        if (currentProfile?.status === "На учебе" && currentProfile.study_started_at) {
-          const sec = Math.floor((new Date() - new Date(currentProfile.study_started_at)) / 1000);
-          document.getElementById("studyTimer").textContent = formatTime(sec);
-          if (sec > 10800) giveAchievement('no_rest'); 
-        } else {
-          document.getElementById("studyTimer").textContent = "0 сек.";
-        }
-      }, 1000);
+      const { data } = await supabase.from("messages").select("*").order("created_at", { ascending: true }).limit(30);
+      document.getElementById("chatBox").innerHTML = data.map(m => `<div><strong>${m.username}:</strong> ${m.text}</div>`).join('');
+      document.getElementById("chatBox").scrollTop = 9999;
     }
 
     async function init() {
       const { data } = await supabase.auth.getUser();
       currentUser = data?.user;
       if (currentUser) {
-        await ensureProfile(currentUser);
-        await loadData();
-        await loadMessages();
-        startTimerLoop();
-      }
+        const now = new Date();
+        const { data: p } = await supabase.from("profiles2").select("*").eq("id", currentUser.id).maybeSingle();
+        if (!p) {
+          await supabase.from("profiles2").insert([{ id: currentUser.id, username: currentUser.user_metadata.full_name || currentUser.email, status: "На учебе", is_online: true, study_started_at: now.toISOString(), last_login_at: now.toISOString() }]);
+          await giveAch('first_step');
+        } else {
+          await supabase.from("profiles2").update({ is_online: true, last_login_at: now.toISOString() }).eq("id", currentUser.id);
+          if (now.getHours() < 8) await giveAch('early_bird');
+          if (now.getHours() >= 0 && now.getHours() < 4) await giveAch('night_owl');
+        }
+        loadData(); loadMessages();
+        timerInterval = setInterval(() => {
+          if (currentProfile?.status === "На учебе" && currentProfile.study_started_at) {
+            const sec = Math.floor((new Date() - new Date(currentProfile.study_started_at)) / 1000);
+            document.getElementById("studyTimer").textContent = fmt(sec);
+            if (sec > 10800) giveAch('no_rest');
+          } else document.getElementById("studyTimer").textContent = "0 сек.";
+        }, 1000);
+      } else { document.getElementById("userNameTitle").textContent = "Войдите в систему"; }
     }
 
-    document.addEventListener("keydown", (e) => { if (e.key === "Enter" && document.activeElement.id === "messageInput") sendMessage(); });
-
-    window.signInWithGoogle = signInWithGoogle; window.signOut = signOut;
-    window.updateStatus = updateStatus; window.finishSession = finishSession;
-    window.sendMessage = sendMessage; window.setBreak = () => { document.getElementById("statusSelect").value = "Перерыв"; updateStatus(); };
-    
+    window.signInWithGoogle = () => supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.href } });
+    window.signOut = async () => { await supabase.from("profiles2").update({ is_online: false }).eq("id", currentUser.id); await supabase.auth.signOut(); location.reload(); };
+    window.updateStatus = updateStatus; window.finishSession = finishSession; window.sendMessage = sendMessage;
+    window.setBreak = () => { document.getElementById("statusSelect").value = "Перерыв"; updateStatus(); };
     init();
-    supabase.channel('realtm').on('postgres_changes', { event: '*', schema: 'public' }, () => { loadData(); loadMessages(); }).subscribe();
+    supabase.channel('room1').on('postgres_changes', { event: '*', schema: 'public' }, () => { loadData(); loadMessages(); }).subscribe();
   </script>
 </body>
 </html>
